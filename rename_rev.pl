@@ -37,7 +37,8 @@ sub usage() {
     print " -nb: no unneeded braces\n";
     print " -ns: no slashes at the end of a line\n";
     print " -pull: for function pull.  deletes context.\n";
-    print " -r <recipe>: NULL, bool, cast";
+    print " -r <recipe>: NULL, bool, cast\n";
+    print " -r amp: changed &(foo->bar) into &foo->bar\n";
     exit(1);
 }
 my @subs;
@@ -145,6 +146,9 @@ while (my $param1 = shift()) {
             next;
         } elsif ($param2 =~ /cast/) {
             push @cmds, ["-e", 's/\(struct .*?\)//'];
+            next;
+        } elsif ($param2 =~ /amp/) {
+            push @cmds, ["-e", 's/&\((.*?)\)/&$1/'];
             next;
         }
 
