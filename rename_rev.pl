@@ -115,7 +115,14 @@ while (my $param1 = shift()) {
         if ($param2 =~ /bool/) {
             push @cmds, ["-e", "s/== true//"];
             push @cmds, ["-e", "s/true ==//"];
-            push @cmds, ["-e", "s/([a-zA-Z\-\>\._]+) == false/!\$1/"];
+            # flipping variables around is easier
+            push @cmds, ["-e",          "s/([a-zA-Z0-9\-\>\._\\[\\]]+) == false/!\$1/"];
+            push @cmds, ["-e",    "s/if \\(([a-zA-Z0-9\-\>\._\\[\\]\\*\&\(\), ]+) == false\\)/if (!\$1)/"];
+            push @cmds, ["-e", "s/while \\(([a-zA-Z0-9\-\>\._\\[\\]\\*\&\(\), ]+) == false\\)/while (!\$1)/"];
+            push @cmds, ["-e",   "s/\\|\\| ([a-zA-Z0-9\-\>\._\\]\\]\\*\&\(\), ]+) == false/|| !\$1/"];
+            push @cmds, ["-e",   "s/\\&\\& ([a-zA-Z0-9\-\>\._\\[\\]\\*\&\(\), ]+) == false/&& !\$1/"];
+            # I ignore != true because what if it's -EINVAL or something
+            # true isn't the only non-zero value so changing != true is tricky
             next;
         } elsif ($param2 =~ /NULL/) {
             push @cmds, ["-e", "s/ != NULL//"];
